@@ -1,25 +1,42 @@
-from urllib.parse import urljoin, urlparse
-from bs4 import BeautifulSoup
 
-def crawl(start_url, html, limit=30):
+
+
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+
+def crawl_docs(start_url, max_pages=60):
     visited = set()
-    queue = [start_url]
+    to_visit = [start_url]
     pages = {}
 
-    domain = urlparse(start_url).netloc
+    base_domain = urlparse(start_url).netloc
 
-    while queue and len(visited) < limit:
-        url = queue.pop(0)
+    while to_visit and len(visited) < max_pages:
+        url = to_visit.pop(0)
         if url in visited:
             continue
 
-        visited.add(url)
-        pages[url] = html
+        try:
+            # r = requests.get(url, timeout=10)
 
-        soup = BeautifulSoup(html, "html.parser")
-        for link in soup.find_all("a", href=True):
-            full_url = urljoin(url, link["href"])
-            if urlparse(full_url).netloc == domain and full_url not in visited:
-                queue.append(full_url)
+            headers = {
+                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+             }
+            r = requests.get(url, headers=headers, timeout=10)
+            if r.status_code != 200:
+                continue
+
+            soup = BeautifulSoup(r.text, "html.parser")
+            pages[url] = soup
+            visited.add(url)
+
+            for a in soup.find_all("a", href=True):
+                link = urljoin(url, a["href"])
+                if base_domain in link and link not in visited:
+                    to_visit.append(link)
+
+        except:
+            continue
 
     return pages

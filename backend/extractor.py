@@ -1,41 +1,29 @@
-from bs4 import BeautifulSoup
+def build_modules(parsed_pages):
+    modules = {
+        "Documentation Overview": {
+            "Description": "",
+            "Submodules": {}
+        }
+    }
 
-def extract_modules(html_pages):
-    modules_map = {}
+    current_module = "Documentation Overview"
+    current_sub = None
 
-    for html in html_pages.values():
-        soup = BeautifulSoup(html, "html.parser")
+    for page in parsed_pages:
+        for tag, text in page:
 
-        current_module = None
-        current_submodule = None
-
-        for tag in soup.find_all(["h1", "h2", "h3", "p"]):
-            text = tag.get_text(strip=True)
-            if len(text) < 8:
+            # Promote headings to submodules
+            if tag in ["h1", "h2", "h3"]:
+                current_sub = text
+                if current_sub not in modules[current_module]["Submodules"]:
+                    modules[current_module]["Submodules"][current_sub] = ""
                 continue
 
-            # h1 → Module
-            if tag.name == "h1":
-                if text not in modules_map:
-                    modules_map[text] = {
-                        "module": text,
-                        "Description": "",
-                        "Submodules": {}
-                    }
-                current_module = modules_map[text]
-                current_submodule = None
+            # Paragraph content
+            if tag == "p":
+                if current_sub:
+                    modules[current_module]["Submodules"][current_sub] += " " + text
+                else:
+                    modules[current_module]["Description"] += " " + text
 
-            # h2 / h3 → Submodule
-            elif tag.name in ["h2", "h3"] and current_module:
-                if text not in current_module["Submodules"]:
-                    current_module["Submodules"][text] = ""
-                current_submodule = text
-
-            # p → Description
-            elif tag.name == "p" and current_module:
-                if not current_module["Description"]:
-                    current_module["Description"] = text
-                elif current_submodule and not current_module["Submodules"][current_submodule]:
-                    current_module["Submodules"][current_submodule] = text
-
-    return list(modules_map.values())
+    return modules

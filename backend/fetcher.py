@@ -1,7 +1,6 @@
 import sys
 import asyncio
 
-# FIX for Windows + asyncio subprocess (Playwright)
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
