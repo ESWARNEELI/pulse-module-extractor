@@ -1,3 +1,15 @@
+## Demo Walkthrough
+
+A 3-minute video demonstration explaining:
+- Project motivation
+- Module extraction logic
+- Folder structure
+- Docker usage
+- Sample output
+**************************************************************************************
+Video Link: https://drive.google.com/file/d/1SPjmLd13UqZLR7k20L-RtqE6RgDtJLot/view
+**************************************************************************************
+
 Pulse – Module Extraction AI Agent
 Overview
 
